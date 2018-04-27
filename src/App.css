@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css?family=Gochi+Hand");
+
 .App {
   text-align: center;
 }
@@ -23,6 +25,20 @@
 }
 
 @keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.square {
+  width: 8rem;
+  height: 8rem;
+  margin: 0.5rem;
+  font-size: 4rem !important;
+  background-color: #61dafb;
+  color: #fff;
+  font-family: "Gochi Hand", cursive;
 }

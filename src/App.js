@@ -2,61 +2,155 @@ import React, { Component } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 
-class App extends Component {
+function calculateWinner(squares) {
+  const lines = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6]
+  ];
+  for (let i = 0; i < lines.length; i++) {
+    const [a, b, c] = lines[i];
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+  return null;
+}
+
+function Square(props) {
+  return (
+    <button className="btn square" onClick={props.onClick}>
+      {props.value}
+    </button>
+  );
+}
+
+class Board extends React.Component {
+  renderSquare(i) {
+    return (
+      <Square
+        value={this.props.squares[i]}
+        onClick={() => this.props.onClick(i)}
+      />
+    );
+  }
+
   render() {
     return (
-      <div className="App">
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-          <a className="navbar-brand" href="#">
-            Navbar
-          </a>
+      <div>
+        <div className="col-12 board-row">
+          {this.renderSquare(0)}
+          {this.renderSquare(1)}
+          {this.renderSquare(2)}
+        </div>
+        <div className="col-12 board-row">
+          {this.renderSquare(3)}
+          {this.renderSquare(4)}
+          {this.renderSquare(5)}
+        </div>
+        <div className="col-12 board-row">
+          {this.renderSquare(6)}
+          {this.renderSquare(7)}
+          {this.renderSquare(8)}
+        </div>
+      </div>
+    );
+  }
+}
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      history: [
+        {
+          squares: Array(9).fill(null)
+        }
+      ],
+      stepNumber: 0,
+      xIsNext: true
+    };
+  }
+
+  handleClick(i) {
+    const history = this.state.history.slice(0, this.state.stepNumber + 1);
+    const current = history[history.length - 1];
+    const squares = current.squares.slice();
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+    squares[i] = this.state.xIsNext ? "X" : "O";
+    this.setState({
+      history: history.concat([
+        {
+          squares: squares
+        }
+      ]),
+      stepNumber: history.length,
+      xIsNext: !this.state.xIsNext
+    });
+  }
+
+  jumpTo(step) {
+    this.setState({
+      stepNumber: step,
+      xIsNext: step % 2 === 0
+    });
+  }
+
+  render() {
+    const history = this.state.history;
+    const current = history[this.state.stepNumber];
+    const winner = calculateWinner(current.squares);
+
+    const moves = history.map((step, move) => {
+      const desc = move ? "Go to move #" + move : "Go to game start";
+      return (
+        <li className="list-group-item" key={move}>
           <button
-            className="navbar-toggler"
-            type="button"
-            data-toggle="collapse"
-            data-target="#navbarColor01"
-            aria-controls="navbarColor01"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
+            className="btn btn-link move"
+            onClick={() => this.jumpTo(move)}
           >
-            <span className="navbar-toggler-icon" />
+            {desc}
           </button>
+        </li>
+      );
+    });
 
-          <div className="collapse navbar-collapse" id="navbarColor01">
-            <ul className="navbar-nav mr-auto">
-              <li className="nav-item active">
-                <a className="nav-link" href="#">
-                  Home <span className="sr-only">(current)</span>
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  Features
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  Pricing
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  About
-                </a>
-              </li>
-            </ul>
-          </div>
-        </nav>
+    let status;
+    if (winner) {
+      status = "Winner: " + winner;
+    } else {
+      status = "Siguiente Jugador: " + (this.state.xIsNext ? "X" : "O");
+    }
 
-        <header className="App-header">
+    return (
+      <div className="App">
+        <header className="App-header mb-4">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
+          <h1 className="App-title">Welcome to React tic tac toe</h1>
         </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-
-        <button className="btn btn-info pt-2 pb-2 pr-4 pl-4 mt-5">Botón 1</button>
+        <div className="container">
+          <div className="row">
+            <div className="col-12 col-md-6 game-board">
+              <Board
+                squares={current.squares}
+                onClick={i => this.handleClick(i)}
+              />
+            </div>
+            <div className="col-12 col-md-6 game-info">
+              <div>{status}</div>
+              <div>
+                <ul className="list-group list-group-flush">{moves}</ul>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
